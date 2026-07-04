@@ -11,6 +11,24 @@ set "GENERATOR=NMake Makefiles"
 if not "%~1"=="" set "GENERATOR=%~1"
 
 echo Running: cmake -S "%ROOT_DIR%" -B "%BUILD_DIR%" -G "%GENERATOR%"
+rem Ensure MSVC environment is initialized for x64 if cl is not already on PATH
+where cl >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+  set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+  if exist "%VSWHERE%" (
+    for /f "usebackq tokens=*" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSINSTALL=%%I"
+    if defined VSINSTALL (
+      set "VCVARS=%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat"
+      if exist "%VCVARS%" (
+        echo Initializing MSVC environment (vcvarsall amd64)...
+        call "%VCVARS%" amd64
+      )
+    )
+  ) else (
+    echo Warning: 'cl' not found and vswhere.exe not present; ensure Visual Studio Developer Tools are available.
+  )
+)
+
 cmake -S "%ROOT_DIR%" -B "%BUILD_DIR%" -G "%GENERATOR%"
 if %ERRORLEVEL% neq 0 (
   echo CMake configure with generator "%GENERATOR%" failed.

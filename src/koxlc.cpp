@@ -168,11 +168,28 @@ int main(int argc, char** argv){
     if(outName.empty()) outName = inpath.stem().string();
     fs::path outobj = outdir / (outName + string(".o"));
 
-    // Assemble using clang if available
-    string cmd = "clang -c \"" + tmpc.string() + "\" -o \"" + outobj.string() + "\" 2>&1";
-    int rc = system(cmd.c_str());
-    if(rc!=0){
-        cerr<<"Failed to assemble with clang. Command: "<<cmd<<"\n";
+    // Produce MSVC COFF .obj if possible (uses `cl` from a VS developer environment).
+    // If `cl` is available, produce `<outName>.obj`. Otherwise fall back to clang (produces .obj with clang-cl or a compatible clang).
+    outobj.replace_extension(".obj");
+    int rc = -1;
+    // check for cl in PATH
+    if(system("cl >nul 2>&1") == 0){
+        string cmd = "cl /nologo /c \"" + tmpc.string() + "\" /Fo\"" + outobj.string() + "\"";
+        rc = system(cmd.c_str());
+        if(rc != 0){
+            cerr<<"MSVC cl failed. Command: "<<cmd<<"\n";
+            return 6;
+        }
+    } else if(system("clang -v >nul 2>&1") == 0){
+        // clang can emit COFF .obj when targeting MSVC/clang-cl; try producing a .obj
+        string cmd = "clang -c \"" + tmpc.string() + "\" -o \"" + outobj.string() + "\" 2>&1";
+        rc = system(cmd.c_str());
+        if(rc != 0){
+            cerr<<"clang failed to produce object. Command: "<<cmd<<"\n";
+            return 7;
+        }
+    } else {
+        cerr<<"MSVC 'cl' or 'clang' not found in PATH. Install Visual Studio build tools (run vcvarsall) or add clang to PATH.\n";
         return 5;
     }
 
