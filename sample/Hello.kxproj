@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Hello</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Kx Include="Hello.kx" />
+  </ItemGroup>
+  <Target Name="Build">
+    <Message Text="Building KOXL project: $(MSBuildProjectName)" Importance="high"/>
+    <Exec Command="koxl %(Kx.Identity)" />
+  </Target>
+</Project>

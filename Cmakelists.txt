@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.8)
+project(koxl VERSION 0.1 LANGUAGES CXX)
+
+add_executable(koxl src/koxlc.cpp)
+
+target_compile_features(koxl PRIVATE cxx_std_17)
+
+if(MSVC)
+  target_compile_options(koxl PRIVATE /W4 /utf-8)
+else()
+  target_compile_options(koxl PRIVATE -Wall -Wextra -pedantic)
+endif()
+
+# Place built executables into the build dir's bin folder for single-config generators
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# For multi-config generators (Visual Studio) set per-config directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
+
+set_target_properties(koxl PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release
+)
+

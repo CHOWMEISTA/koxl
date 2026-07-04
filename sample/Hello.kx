@@ -1,0 +1,2 @@
+// Hello.kx - sample KOXL source
+print("Hello, KOXL");
